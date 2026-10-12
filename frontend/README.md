@@ -73,7 +73,7 @@ Then open your browser and go to `http://127.0.0.1:8000`
 
 ## Deployment
 
-The frontend and Flask API must be deployed separately. Create the API on Render from the repository Blueprint (`render.yaml`). In Vercel, set the project root directory to `frontend`, then set the production environment variable `VITE_API_BASE_URL` to the base URL of the deployed Flask backend (for example, `https://your-backend.onrender.com`, without `/api/detect`). Redeploy the frontend so the new value is included in the build. The frontend will use `http://127.0.0.1:5000` automatically only during local development.
+The frontend and Flask API must be deployed separately. Create the API on Render from the repository Blueprint (`render.yaml`). Its backend requirements pin CPU-only PyTorch, and `backend/.python-version` pins Python 3.11 for the supported CPU inference setup. In Vercel, set the project root directory to `frontend`, then set the production environment variable `VITE_API_BASE_URL` to the base URL of the deployed Flask backend (for example, `https://your-backend.onrender.com`, without `/api/detect`). Redeploy the frontend so the new value is included in the build. The frontend will use `http://127.0.0.1:5000` automatically only during local development.
 
 ---
 
