@@ -1,12 +1,13 @@
 
 import React from 'react';
-import { MapPin, Globe } from 'lucide-react';
+import { MapPin, Globe, TriangleAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 
 interface ResultsDisplayProps {
   resultImage: string | null;
   gpsCoordinates: { latitude: number; longitude: number } | null;
+  hasDetections: boolean;
   plasticLevel?: 'low' | 'medium' | 'high';
   isLoading?: boolean;
 }
@@ -14,6 +15,7 @@ interface ResultsDisplayProps {
 const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   resultImage,
   gpsCoordinates,
+  hasDetections,
   plasticLevel = 'low',
   isLoading = false,
 }) => {
@@ -33,6 +35,36 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
         <p className="text-muted-foreground">
           No results to display yet. Upload an image to detect plastic.
         </p>
+      </div>
+    );
+  }
+
+  if (!hasDetections) {
+    return (
+      <div className="flex flex-col space-y-5 animate-fade-in">
+        <div className="glass-card rounded-2xl overflow-hidden">
+          <img
+            src={resultImage}
+            alt="Selected image with no detected plastic"
+            className="w-full h-auto max-h-[500px] object-contain"
+          />
+        </div>
+        <div
+          role="status"
+          className="glass-card rounded-xl p-6 flex items-start space-x-4 border border-orange-500/30"
+        >
+          <div className="p-2.5 rounded-lg bg-orange-500/20">
+            <TriangleAlert className="w-5 h-5 text-orange-500" />
+          </div>
+          <div>
+            <h3 className="font-medium">Detection not possible</h3>
+            <p className="text-sm text-muted-foreground mt-1">
+              The model couldn't identify plastic in this image. It may not contain
+              recognizable plastic or may differ from the images used to train the
+              model. Try another clear underwater image showing visible plastic waste.
+            </p>
+          </div>
+        </div>
       </div>
     );
   }

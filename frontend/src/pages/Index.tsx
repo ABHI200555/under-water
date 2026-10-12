@@ -22,12 +22,15 @@ const Index = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleImageSelected = (file: File) => {
+  const handleImageSelected = (file: File | null) => {
     setSelectedFile(file);
+    if (file) {
+      void handleSubmit(file);
+    }
   };
 
-  const handleSubmit = async () => {
-    if (!selectedFile) {
+  const handleSubmit = async (fileToAnalyze = selectedFile) => {
+    if (!fileToAnalyze) {
       toast({
         title: "No image selected",
         description: "Please upload an image first",
@@ -47,7 +50,7 @@ const Index = () => {
 
       // Create form data to send to the backend
       const formData = new FormData();
-      formData.append('image', selectedFile);
+      formData.append('image', fileToAnalyze);
       
       // Call Flask backend API
       const response = await fetch(`${API_URL}/api/detect`, {
@@ -112,8 +115,8 @@ const Index = () => {
                 <br /> In Underwater Environments
               </h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto animate-fade-down animate-delay-200">
-                Upload your underwater images to identify plastic waste using our 
-                advanced detection system powered by YOLOv8.
+                Select an underwater image to automatically identify plastic waste
+                using our YOLOv8 detection system.
               </p>
             </div>
 
@@ -147,8 +150,8 @@ const Index = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-up animate-delay-400">
               {[
                 {
-                  title: "Upload",
-                  description: "Upload underwater images in common formats like JPEG or PNG."
+                  title: "Select",
+                  description: "Choose an underwater image in a common format like JPEG or PNG."
                 },
                 {
                   title: "Analyze",

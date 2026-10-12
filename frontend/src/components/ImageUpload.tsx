@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 
 interface ImageUploadProps {
-  onImageSelected: (file: File) => void;
+  onImageSelected: (file: File | null) => void;
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected }) => {
@@ -13,6 +13,32 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const { toast } = useToast();
+
+  const processFile = useCallback((file: File) => {
+    if (!file.type.match('image.*')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file (JPEG, PNG, etc.)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+    onImageSelected(file);
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    toast({
+      title: "Image selected",
+      description: "Detection will start automatically.",
+      variant: "default",
+    });
+  }, [onImageSelected, toast]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -33,7 +59,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected }) => {
       const file = e.dataTransfer.files[0];
       processFile(file);
     }
-  }, []);
+  }, [processFile]);
 
   const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -41,39 +67,13 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onImageSelected }) => {
       const file = e.target.files[0];
       processFile(file);
     }
-  }, []);
-
-  const processFile = useCallback((file: File) => {
-    if (!file.type.match('image.*')) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload an image file (JPEG, PNG, etc.)",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setSelectedFile(file);
-    onImageSelected(file);
-    
-    // Create image preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-    
-    toast({
-      title: "Image uploaded",
-      description: "Your image has been successfully uploaded.",
-      variant: "default",
-    });
-  }, [onImageSelected, toast]);
+  }, [processFile]);
 
   const handleRemoveFile = useCallback(() => {
     setSelectedFile(null);
     setPreview(null);
-  }, []);
+    onImageSelected(null);
+  }, [onImageSelected]);
 
   return (
     <div className="w-full flex flex-col items-center space-y-6">

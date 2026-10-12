@@ -29,7 +29,7 @@ Visualize plastic detection points around the globe.
 
 ## 🚀 Features
 
-✅ Detect plastic waste in underwater images using YOLOv8  
+✅ Automatically detect plastic waste with YOLOv8 when an image is selected
 ✅ Summarize detections with confidence scores & plastic level  
 ✅ Visualize detection locations on a global map (powered by Leaflet)  
 ✅ Download processed images with annotations  
@@ -79,11 +79,13 @@ The frontend and Flask API must be deployed separately. For Render, set the root
 
 ## 🧑‍💻 How It Works
 
-1. **Image Upload**: Users upload underwater images via the web interface.
+1. **Image Selection**: Selecting an underwater image starts detection automatically; the image is sent to the Flask backend for analysis.
 2. **Preprocessing**: Images are resized and normalized.
 3. **Detection**: YOLOv8 model detects plastic objects and classifies them (e.g., bottles, bags).
 4. **Visualization**: Detected objects are highlighted and their coordinates mapped globally.
 5. **Download Option**: Users can download annotated images or view results on the global map.
+
+The backend uses the trained weights in `backend/models/ecobot.pt`. The provided labeled dataset contains the same 15 classes but no trained checkpoint, so it is not needed at runtime.
 
 ---
 

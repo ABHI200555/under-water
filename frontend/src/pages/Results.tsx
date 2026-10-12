@@ -13,7 +13,7 @@ import { generateRandomOceanCoordinates, storeDetectionRecord } from '@/lib/gpsU
 const Results = () => {
   const [resultImage, setResultImage] = useState<string | null>(null);
   const [gpsCoordinates, setGpsCoordinates] = useState<{ latitude: number; longitude: number } | null>(null);
-  const [detections, setDetections] = useState<any[]>([]);
+  const [detections, setDetections] = useState<unknown[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [confidence, setConfidence] = useState<number>(0);
   const [plasticLevel, setPlasticLevel] = useState<'low' | 'medium' | 'high'>('low');
@@ -35,17 +35,14 @@ const Results = () => {
       
       const timer = setTimeout(() => {
         setResultImage(results.resultImage);
-        
-    
-        const coordinates = generateRandomOceanCoordinates();
-        setGpsCoordinates(coordinates);
-        
-        setDetections(results.detections || []);
-        
-        const detectionCount = results.detections?.length || 0;
+
+        const detectedObjects = results.detections || [];
+        setDetections(detectedObjects);
+
+        const detectionCount = detectedObjects.length;
         const avgConfidence = results.averageConfidence * 100 || 0;
         setConfidence(avgConfidence);
-        
+
         // Determine plastic level based on number of detections
         let level: 'low' | 'medium' | 'high' = 'low';
         if (detectionCount >= 5) {
@@ -54,9 +51,12 @@ const Results = () => {
           level = 'medium';
         }
         setPlasticLevel(level);
-        
-        // Store the detection in localStorage
-        storeDetectionRecord(coordinates, level);
+
+        if (detectionCount > 0) {
+          const coordinates = generateRandomOceanCoordinates();
+          setGpsCoordinates(coordinates);
+          storeDetectionRecord(coordinates, level);
+        }
         
         setIsLoading(false);
       }, 1000);
@@ -128,6 +128,7 @@ const Results = () => {
                 <ResultsDisplay
                   resultImage={resultImage}
                   gpsCoordinates={gpsCoordinates}
+                  hasDetections={detections.length > 0}
                   plasticLevel={plasticLevel}
                   isLoading={isLoading}
                 />
@@ -147,32 +148,38 @@ const Results = () => {
                     <div className="space-y-3 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Status</span>
-                        <span className="font-medium text-primary">Completed</span>
+                        <span className={`font-medium ${detections.length > 0 ? "text-primary" : "text-orange-500"}`}>
+                          {detections.length > 0 ? "Detection complete" : "No detection"}
+                        </span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Detection Model</span>
                         <span>{MODEL_NAME}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Confidence</span>
-                        <span>{confidence.toFixed(2)}%</span>
-                      </div>
+                      {detections.length > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Confidence</span>
+                          <span>{confidence.toFixed(2)}%</span>
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Items Detected</span>
                         <span>{detections.length}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Plastic Level</span>
-                        <span className={
-                          plasticLevel === 'low' ? "text-green-500" : 
-                          plasticLevel === 'medium' ? "text-orange-500" : 
-                          "text-red-500"
-                        }>
-                          {plasticLevel === 'low' ? "Low" : 
-                           plasticLevel === 'medium' ? "Medium" : 
-                           "High"}
-                        </span>
-                      </div>
+                      {detections.length > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Plastic Level</span>
+                          <span className={
+                            plasticLevel === 'low' ? "text-green-500" :
+                            plasticLevel === 'medium' ? "text-orange-500" :
+                            "text-red-500"
+                          }>
+                            {plasticLevel === 'low' ? "Low" :
+                             plasticLevel === 'medium' ? "Medium" :
+                             "High"}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -187,9 +194,13 @@ const Results = () => {
                 )}
                 
                 <div className="glass-card rounded-xl p-6 animate-fade-up animate-delay-500">
-                  <h3 className="text-lg font-medium mb-3">What's Next?</h3>
+                  <h3 className="text-lg font-medium mb-3">
+                    {detections.length > 0 ? "What's Next?" : "Try Another Image"}
+                  </h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    You can download the processed image, or upload another image for detection.
+                    {detections.length > 0
+                      ? "Download the processed image, or select another image for detection."
+                      : "Choose a different clear underwater image and try detection again."}
                   </p>
                   <Button
                     onClick={handleBackToHome}
