@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: ecobot-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn --workers 1 --threads 1 --timeout 300 app:app
+    healthCheckPath: /
